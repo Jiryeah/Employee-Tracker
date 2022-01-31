@@ -19,5 +19,7 @@ db.connect ((err) => {
   InitialPrompt();
 });
 
+db.query = util.promisify(connection.query);
+
 // exporting it so it can be used by the code base
 module.exports = db;

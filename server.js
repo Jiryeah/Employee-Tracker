@@ -20,8 +20,8 @@ function initialPrompt() {
       `End`
     ]
   })
-  .then(answers => {
-    switch(answers) {
+  .then(responses => {
+    switch(responses) {
       case `View Employees`:
         employeesOnly();
         initialPrompt();
@@ -38,22 +38,62 @@ function initialPrompt() {
         break;
 
       case `Add new Employee`:
-        addEmployee();
-        initialPrompt();
+        inquirer
+        .prompt([
+          {
+            type: `input`,
+            name: `eFirstName`,
+            message: `What is the employee's first name?`,
+            validate: response => {
+              if(!response) {
+                return true;
+              }
+              return `Please enter a first name!`;
+            }
+          },
+          {
+            type: `input`,
+            name: `eLastName`,
+            message: `What is the employee's last name?`,
+            validate: response => {
+              if(!response) {
+                return true;
+              }
+              return `Please enter a last name!`;
+            }
+          },
+          {
+            type: `input`,
+            name: `department`,
+            message: `Please enter the role id`,
+          },
+          {
+            type: `input`,
+            name: `manager`,
+            message: `Please enter the manager id`,
+          }
+        ])
+        .then(responses => {
+          newEmployee(responses.eFirstName, responses.eLastName, responses.department, responses.manager);
+          initialPrompt();
+        })
         break;
       
       case `Add Role`:
-        addRole();
-        initialPrompt();
-        break;
+        inqui
 
       case `Add Department`:
         addDepartment();
+        initialPrompt();
+
+      case `Update Employee Role`:
+        updateRole();
         initialPrompt();
       
       case `End`:
         db.end();
         break;
-    }
-  })        
-}
+    };
+  });      
+};
+
