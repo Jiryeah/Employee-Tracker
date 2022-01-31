@@ -12,5 +12,12 @@ const db = mysql.createConnection(
   console.log(`Connected to the Employee Tracker database.`)
 );
 
+// error handling
+db.connect ((err) => {
+  if (err) throw err;
+  // run the initial batch of ?'s after successful con
+  InitialPrompt();
+});
+
 // exporting it so it can be used by the code base
 module.exports = db;
