@@ -44,22 +44,26 @@ function initialPrompt() {
             type: `input`,
             name: `eFirstName`,
             message: `What is the employee's first name?`,
-            validate: response => {
-              if(!response) {
+            validate: firstName => {
+              if(firstName) {
                 return true;
+              } else {
+                console.log(`Please enter a first name!`);
+                return false;
               }
-              return `Please enter a first name!`;
             }
           },
           {
             type: `input`,
             name: `eLastName`,
             message: `What is the employee's last name?`,
-            validate: response => {
-              if(!response) {
+            validate: lastName => {
+              if(lastName) {
                 return true;
+              } else {
+                console.log(`Please enter a last name!`);
+                return false;
               }
-              return `Please enter a last name!`;
             }
           },
           {
