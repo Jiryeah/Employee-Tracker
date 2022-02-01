@@ -46,17 +46,14 @@ initialPrompt = () => {
       switch (responses.choices) {
         case `View Employees`:
           viewEmployees();
-          initialPrompt();
           break;
 
         case `View all Departments`:
           viewDepartments();
-          initialPrompt();
           break;
 
         case `View all Roles`:
           viewRoles();
-          initialPrompt();
           break;
 
         case `Add an Employee`:
@@ -106,7 +103,6 @@ initialPrompt = () => {
                 responses.department,
                 responses.manager
               );
-              initialPrompt();
             });
           break;
 
@@ -143,7 +139,6 @@ initialPrompt = () => {
                 responses.salary,
                 responses.department_id
               );
-              initialPrompt();
             });
           break;
 
@@ -166,7 +161,6 @@ initialPrompt = () => {
             ])
             .then(responses => {
               addDepartment(responses.department);
-              initialPrompt();
             })
           break;
 
@@ -185,11 +179,10 @@ initialPrompt = () => {
               }
             ])
             .then(responses => {
-              updateRole(
+              updateEmployeeRole(
                 responses.employeeId,
                 responses.roleId
               );
-              initialPrompt();
             })
           break;
 
@@ -204,7 +197,7 @@ initialPrompt = () => {
 // Functions for viewing all: employees, departments, and roles.
 
 const viewEmployees = () => {
-  let query = 
+  let sql = 
     `SELECT employee.id, employee.first_name, 
     employee.last_name, role.title, department.department_name 
     AS department, role.salary, 
@@ -215,36 +208,110 @@ const viewEmployees = () => {
     LEFT JOIN department on role.department_id = department.id 
     LEFT JOIN employee manager on manager.id = employee.manager_id`
   
-  db.query(query, (err, res) => {
+  db.query(sql, (err, res) => {
     if (err) throw err;
 
     console.table(res);
-    console.log(`Our Wonderful Employees!`)
+    console.log(`Our Wonderful Employees!`);
+
+    initialPrompt();
   });
 }
 
 const viewDepartments = () => {
-  let query = 
+  let sql = 
   `SELECT department_name FROM department`
 
-  db.query(query, (err, res) => {
+  db.query(sql, (err, res) => {
     if (err) throw err;
 
     console.table(res);
-    console.log(`The Departments.`)
+    console.log(`The Departments.`);
+
+    initialPrompt();
   });
 }
 
 const viewRoles = () => {
-  let query = 
+  let sql = 
   `SELECT title, salary, department_id FROM role`
 
-  db.query(query, (err, res) => {
+  db.query(sql, (err, res) => {
     if (err) throw err;
 
     console.table(res);
-    console.log(`The Roles!`)
+    console.log(`The Roles!`);
+
+    initialPrompt();
   });
 }
 
-module.exports = initialPrompt;
+const newEmployee = (firstName, lastName, department, manager) => {
+  let sql =
+  `INSERT INTO employee 
+  SET first_name = ?, 
+  last_name = ?, 
+  role_id = ?, 
+  manager_id = ?`
+
+  let params = [firstName, lastName, department, manager];
+
+  db.query(sql, params, (err, res) => {
+    if (err) throw err;
+
+    console.table(res);
+    console.log(`You've added a new employee, congrats!`);
+  });
+  // So the new employee addition can be viewed.
+  viewEmployees();
+}
+
+const addRole = (title, salary, department_id) => {
+  let sql =
+  `INSERT INTO role 
+  SET title = ?, 
+  salary = ?, 
+  department_id = ?`
+
+  let params = [title, salary, department_id];
+
+  db.query(sql, params, (err, res) => {
+    if (err) throw err;
+
+    console.table(res);
+    console.log(`You've added a new Role, congrats!`);
+  });
+  // So the role addition can be viewed. 
+  viewRoles();
+  initialPrompt();
+}
+
+const addDepartment = (department) => {
+  let sql = `INSERT INTO department SET department_name = ?`
+  let params = [department]
+
+  db.query(sql, params, (err, res) => {
+    if (err) throw err;
+
+    console.table(res);
+    console.log(`You've added a new department, woohoo!`);
+  })
+  // Show the updated departments list
+  viewDepartments();
+  initialPrompt();
+}
+
+const updateEmployeeRole = (roleId, employeeId) => {
+  let sql = `UPDATE employee SET role_id = ? WHERE id = ?`
+  let params = [roleId, employeeId]
+
+  db.query(sql, params, (err, res) => {
+    if (err) throw err;
+
+    console.table(res);
+    console.log(`Employee role update successful!`)
+  })
+  //Show the updated role change
+  viewEmployees();
+  initialPrompt();
+}
