@@ -1,8 +1,26 @@
-// importing mysql that is available globally
-const db = require(`./config/connection`);
-const fs = require(`fs`);
+
+const mysql = require(`mysql2`);
 const inquirer = require(`inquirer`);
 require(`console.table`);
+
+// connect to MySql database
+const db = mysql.createConnection(
+  {
+    host: `localhost`,
+    user: `root`,
+    password: ``,
+    database: `employee_tracker`
+  },
+  console.log(`Connected to the Employee Tracker database.`)
+);
+
+// error handling
+db.connect ((err) => {
+  if (err) throw err;
+  // run the initial batch of ?'s after successful con
+  initialPrompt();
+});
+
 
 initialPrompt = () => {
   inquirer
@@ -24,18 +42,15 @@ initialPrompt = () => {
     .then((responses) => {
       switch (responses.choices) {
         case `View Employees`:
-          employeesOnly();
-          initialPrompt();
+          viewEmployees();
           break;
 
-        case `View Employees by Department`:
-          departmentOnly();
-          initialPrompt();
+        case `View all Departments`:
+          viewDepartments();
           break;
 
-        case `View Employees by Role`:
-          employeeRoles();
-          initialPrompt();
+        case `View all Roles`:
+          viewRoles();
           break;
 
         case `Add new Employee`:
@@ -171,10 +186,64 @@ initialPrompt = () => {
               initialPrompt();
             })
           break;
-          
+
         case `End`:
           db.end();
           break;
       }
     });
 };
+
+// Functions for viewing all: employees, departments, and roles.
+
+const viewEmployees = () => {
+  let query = 
+    `SELECT employee.id, employee.first_name, 
+    employee.last_name, role.title, department.d_name 
+    AS department, role.salary, 
+    CONCAT(manager.first_name, ' ', manager.last_name) 
+    AS manager 
+    FROM employee 
+    LEFT JOIN role on employee.role_id = role.id 
+    LEFT JOIN department on role.department_id = department.id 
+    LEFT JOIN employee manager on manager.id = employee.manager_id`
+  
+  db.query(query, (err, res) => {
+    if (err) throw err;
+
+    console.table(res);
+    console.log(`Our Wonderful Employees!`)
+
+    initialPrompt();
+  });
+}
+
+const viewDepartments = () => {
+  let query = 
+  `SELECT department_name FROM department`
+
+  db.query(query, (err, res) => {
+    if (err) throw err;
+
+    console.table(res);
+    console.log(`Employees by Department!`)
+
+    initialPrompt();
+  });
+}
+
+const viewRoles = () => {
+  let query = 
+  `SELECT title, salary, department_id FROM role`
+
+  db.query(query, (err, res) => {
+    if (err) throw err;
+
+    console.table(res);
+    console.log(`The Roles!`)
+
+    initialPrompt();
+  });
+}
+
+module.exports = initialPrompt;
