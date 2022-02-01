@@ -31,8 +31,8 @@ Employee Tracker is a command-line application. This application will help manag
 
 
 
-## Link to Deployed Application/ Video walkthrough
--https://jiryeah.github.io/Note-Taker/
+## Link to Video walkthrough
+-
 
 
 
