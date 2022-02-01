@@ -1,7 +1,8 @@
-
 const mysql = require(`mysql2`);
+
 const inquirer = require(`inquirer`);
 require(`console.table`);
+const utility = require(`util`);
 
 // connect to MySql database
 const db = mysql.createConnection(
@@ -21,6 +22,8 @@ db.connect ((err) => {
   initialPrompt();
 });
 
+db.query = utility.promisify(db.query)
+
 
 initialPrompt = () => {
   inquirer
@@ -28,32 +31,35 @@ initialPrompt = () => {
       type: `list`,
       name: `choices`,
       message: `What would you like to do?`,
-      choice: [
+      choices: [
         `View Employees`,
-        `View Employees by Department`,
-        `View Employees by Manager`,
-        `Add Employee`,
-        `Add Department`,
-        `Add Role`,
+        `View all Departments`,
+        `View all Roles`,
+        `Add an Employee`,
+        `Add a Role`,
+        `Add a Department`,
         `Update Employee Role`,
-        `End`,
+        `Exit`,
       ],
     })
     .then((responses) => {
       switch (responses.choices) {
         case `View Employees`:
           viewEmployees();
+          initialPrompt();
           break;
 
         case `View all Departments`:
           viewDepartments();
+          initialPrompt();
           break;
 
         case `View all Roles`:
           viewRoles();
+          initialPrompt();
           break;
 
-        case `Add new Employee`:
+        case `Add an Employee`:
           inquirer
             .prompt([
               {
@@ -104,7 +110,7 @@ initialPrompt = () => {
             });
           break;
 
-        case `Add Role`:
+        case `Add a Role`:
           inquirer
             .prompt([
               {
@@ -141,7 +147,7 @@ initialPrompt = () => {
             });
           break;
 
-        case `Add Department`:
+        case `Add a Department`:
           inquirer
             .prompt([
               {
@@ -187,8 +193,9 @@ initialPrompt = () => {
             })
           break;
 
-        case `End`:
+        case `Exit`:
           db.end();
+          console.log(`Thank you, and Goodbye!`);
           break;
       }
     });
@@ -199,7 +206,7 @@ initialPrompt = () => {
 const viewEmployees = () => {
   let query = 
     `SELECT employee.id, employee.first_name, 
-    employee.last_name, role.title, department.d_name 
+    employee.last_name, role.title, department.department_name 
     AS department, role.salary, 
     CONCAT(manager.first_name, ' ', manager.last_name) 
     AS manager 
@@ -213,8 +220,6 @@ const viewEmployees = () => {
 
     console.table(res);
     console.log(`Our Wonderful Employees!`)
-
-    initialPrompt();
   });
 }
 
@@ -226,9 +231,7 @@ const viewDepartments = () => {
     if (err) throw err;
 
     console.table(res);
-    console.log(`Employees by Department!`)
-
-    initialPrompt();
+    console.log(`The Departments.`)
   });
 }
 
@@ -241,8 +244,6 @@ const viewRoles = () => {
 
     console.table(res);
     console.log(`The Roles!`)
-
-    initialPrompt();
   });
 }
 
